@@ -22,8 +22,8 @@ import sys
 import time
 import urllib.parse
 import urllib.request
-import pywikibot
-import pywikibot.pagegenerators as pagegenerators
+#import pywikibot
+#import pywikibot.pagegenerators as pagegenerators
 
 from archiveteamfun import *
 
@@ -81,13 +81,32 @@ def curateurls(wlist=''):
     return sectionentries
 
 
+class MockPage:
+    def __init__(self, title, text):
+        self._title = title
+        self.text = text
+
+    def title(self):
+        return self._title
+
+    def exists(self):
+        return True
+
+    def save(self, comment):
+        print('save {!r} with comment {!r} and contents:'.format(self._title, comment))
+        print('===========start contents================')
+        print(self.text)
+        print('===========end contents==================')
+
+
 def main():
-    atsite = pywikibot.Site('archiveteam', 'archiveteam')
-    cat = pywikibot.Category(atsite, "Category:ArchiveBot")
-    gen = pagegenerators.CategorizedPageGenerator(cat, start="!")
-    pre = pagegenerators.PreloadingGenerator(gen, pageNumber=60)
+#    atsite = pywikibot.Site('archiveteam', 'archiveteam')
+#    cat = pywikibot.Category(atsite, "Category:ArchiveBot")
+#    gen = pagegenerators.CategorizedPageGenerator(cat, start="!")
+#    pre = pagegenerators.PreloadingGenerator(gen, pageNumber=60)
     
-    for page in pre:
+#    for page in pre:
+    for page in [MockPage('ArchiveBot/Example', 'Foo\n<!-- bot:Main --><!-- /bot -->\nBar\n<!-- bot:Foo --><!-- /bot -->\nBaz')]:
         wtitle = page.title()
         wtext = page.text
         
@@ -97,7 +116,8 @@ def main():
         #if not wtitle.startswith('ArchiveBot/National Film'):
         if not wtitle.startswith('ArchiveBot/'):
             continue
-        wlist = pywikibot.Page(atsite, '%s/list' % (wtitle))
+#        wlist = pywikibot.Page(atsite, '%s/list' % (wtitle))
+        wlist = MockPage('ArchiveBot/Example/list', '= Main =\nhttp://archiveteam.org/\n\n= Foo =\nhttps://foo.archiveteam.org/\nhttps://bar.archiveteam.org/')
         if not wlist.exists():
             print("Page %s/list doesnt exist" % (wtitle))
             continue
@@ -195,7 +215,7 @@ Do not edit this table, it is automatically updated by bot. There is a [[{{FULLP
         newtext = ''.join(newtext)
 
         if wtext != newtext:
-            pywikibot.showDiff(wtext, newtext)
+#            pywikibot.showDiff(wtext, newtext)
             page.text = newtext
             page.save("BOT - Updating page: {{saved}} (%s), {{notsaved}} (%s), Total size (%s)" % (len(re.findall(r'{{saved}}', rowsplain)), len(re.findall(r'{{notsaved}}', rowsplain)), convertsize(b=totaljobsize)))
         else:
